@@ -72,7 +72,19 @@ class Code_model extends Model {
 		if($allVersions){
 			$sql = 'select * from `bits` ORDER BY created DESC';
 		} else {
-			$sql = 'select *, MAX(`bits`.version) as latestVersion from `bits` GROUP BY `bits`.slug ORDER BY created DESC';
+			$sql = '
+SELECT f.*,
+x.lv as latestVersion
+FROM (
+	SELECT slug, MAX(version) as lv
+	FROM bits
+	GROUP BY slug
+) as x
+INNER JOIN
+bits as f
+ON f.slug = x.slug
+AND f.version = x.lv
+ORDER BY f.created DESC';
 		}
 		$res = $this->query($sql);
 		if($res){
